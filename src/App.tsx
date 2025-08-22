@@ -7,36 +7,62 @@ function getRandomName(): string {
   return `Clock-${value}`;
 }
 
-export const App: React.FC = () => {
-  const [clockName, setClockName] = useState('Clock-0');
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
+type State = {
+  hasClock: boolean;
+  clockName: string;
+  time: string;
+};
 
-  useEffect(() => {
-    const nameTimerId = window.setInterval(() => {
-      setClockName(getRandomName());
+export class App extends React.Component<{}, State> {
+  private nameTimerId?: number;
+
+  private timeTimerId?: number;
+
+  constructor(props: {}) {
+    super(props);
+
+    this.state = {
+      hasClock: true,
+      clockName: 'Clock-0',
+      time: new Date().toLocaleTimeString(),
+    };
+  }
+
+  componentDidMount(): void {
+    this.nameTimerId = window.setInterval(() => {
+      this.setState({ clockName: getRandomName() });
     }, 3300);
 
-    const timeTimerId = window.setInterval(() => {
-      setTime(new Date().toLocaleTimeString());
+    this.timeTimerId = window.setInterval(() => {
+      this.setState({ time: new Date().toLocaleTimeString() });
     }, 1000);
+  }
 
-    return () => {
-      clearInterval(nameTimerId);
-      clearInterval(timeTimerId);
-    };
-  }, []);
+  componentWillUnmount(): void {
+    if (this.nameTimerId) {
+      clearInterval(this.nameTimerId);
+    }
 
-  return (
-    <div className="App">
-      <h1>React clock</h1>
+    if (this.timeTimerId) {
+      clearInterval(this.timeTimerId);
+    }
+  }
 
-      <div className="Clock">
-        <strong className="Clock__name">{clockName}</strong>
+  render(): React.ReactNode {
+    const { hasClock, clockName, time } = this.state;
 
-        {' time is '}
+    return (
+      <div className="App">
+        <h1>React clock</h1>
 
-        <span className="Clock__time">{time}</span>
+        {hasClock && (
+          <div className="Clock">
+            <strong className="Clock__name">{clockName}</strong>
+            {' time is '}
+            <span className="Clock__time">{time}</span>
+          </div>
+        )}
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
