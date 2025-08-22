@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.scss';
 
 function getRandomName(): string {
@@ -8,16 +8,23 @@ function getRandomName(): string {
 }
 
 export const App: React.FC = () => {
-  const today = new Date();
-  let clockName = 'Clock-0';
+  const [clockName, setClockName] = useState('Clock-0');
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
 
-  // This code starts a timer
-  const timerId = window.setInterval(() => {
-    clockName = getRandomName();
-  }, 3300);
+  useEffect(() => {
+    const nameTimerId = window.setInterval(() => {
+      setClockName(getRandomName());
+    }, 3300);
 
-  // this code stops the timer
-  window.clearInterval(timerId);
+    const timeTimerId = window.setInterval(() => {
+      setTime(new Date().toLocaleTimeString());
+    }, 1000);
+
+    return () => {
+      clearInterval(nameTimerId);
+      clearInterval(timeTimerId);
+    };
+  }, []);
 
   return (
     <div className="App">
@@ -28,9 +35,7 @@ export const App: React.FC = () => {
 
         {' time is '}
 
-        <span className="Clock__time">
-          {today.toUTCString().slice(-12, -4)}
-        </span>
+        <span className="Clock__time">{time}</span>
       </div>
     </div>
   );
